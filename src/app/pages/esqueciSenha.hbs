@@ -95,6 +95,11 @@
 </body>
 <script src="/public/scripts/form.js"></script>
 {{#if info.error}}
-<script>alert("Este e-mail não existe!")</script>
+<script>
+    if( typeof Android !== 'undefined'){
+        Android.jsShowToast("Este e-mail não existe!")
+    }else{
+        alert("Este e-mail não existe!")</script>
+    }
 {{/if}}
 </html>
