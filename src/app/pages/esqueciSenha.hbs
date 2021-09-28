@@ -96,10 +96,12 @@
 <script src="/public/scripts/form.js"></script>
 {{#if info.error}}
 <script>
-    if( typeof Android !== 'undefined'){
-        Android.jsShowToast("Este e-mail não existe!")
-    }else{
-        alert("Este e-mail não existe!")</script>
-    }
+    $(function function showAndroidToast(toast) {
+            if (typeof Android !== 'undefined') 
+                Android.jsShowToast(toast); 
+            else
+            alert(toast)
+        })
+        showAndroidToast("Este e-mail não existe!")
 {{/if}}
 </html>
