@@ -74,14 +74,13 @@
 </body>
 <script src="/public/scripts/form.js"></script>
 {{#if info.error}}
-   <script>
-    $(function function showAndroidToast(toast) {
-            if (typeof Android !== 'undefined') 
-                Android.jsShowToast(toast); 
-            else
-            alert(toast)
-        })
-        showAndroidToast("O e-mail e/ou senha estão incorretos ou não cadastrados!")
+<script>
+    if( typeof Android !== 'undefined'){
+        Android.jsShowToast("O e-mail e/ou senha estão incorretos ou não cadastrados!")
+    }else{
+        window.alert("O e-mail e/ou senha estão incorretos ou não cadastrados!"); 
+    }
+    window.location.href="/"
     </script>
 {{/if}}
 </html>
