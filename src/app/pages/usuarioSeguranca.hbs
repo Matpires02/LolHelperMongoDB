@@ -223,7 +223,23 @@
         </div>
 </body>
 <script src="/public/scripts/usuarioSeguranca.js"></script>
+{{#if info.error}}
 <script>
+    if("{{info.error}}" ===  'senhaERR'){
+        if( typeof Android !== 'undefined'){
+        Android.jsShowToast("Senha atual diferente da cadastrada! Verifique e tente novamente")
+    }else{
+        alert("Senha atual diferente da cadastrada! Verifique e tente novamente")
+       
+    }
+    }else{
+        if( typeof Android !== 'undefined'){
+        Android.jsShowToast("Não foi possivel completar a atualização no cadastro. Tente novamente! ")
+    }else{
+        alert("Não foi possivel completar a atualização no cadastro. Tente novamente! ")
+       
+    }
+    }
 </script>
-
+{{/if}}
 </html>

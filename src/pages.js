@@ -1,11 +1,32 @@
 //const db = require("./db");
 const bd = require("./dbmongo")
+var crypto = require('crypto');
 const rotaSup = ". Quando você decide por jogar de suporte, precisa compreender que ele está no jogo com o intuito de ajudar o Atirador a adquirir seus recursos, conceder visão para o time e realizar a proteção de seus parceiros. Além disso, o suporte, na Fase de Rotas, é capaz de se movimentar pelo mapa para, além de garantir a visão, auxiliar seus parceiros de time com o que estiver ao seu alcance."
 const rotaadc= ". O Atirador é aquele campeão que causa dano físico à distância, mais comumente atua na rota inferior, conta com a ajuda de um companheiro - o Suporte -, e que tem a meta de ser o maior causador de dano de seu time.",
 rotaJg = ". O caçador (jungler) no League of Legends é um dos membros do time que mais possui o poder de influenciar diretamente no resultado do começo da partida. Com liberdade de se movimentar pelo mapa, o jungler pode adquirir recursos na selva, dar visão para seu time e, principalmente, ajudar cada rota executando seus ganks. Se executar suas ações com sucesso, o caçador pode ditar o ritmo da partida. Além de todas essas características, ele ainda tem a responsabilidade de carregar o feitiço “Golpear”, que, além de ajudar a eliminar os campos da selva com mais segurança e facilidade, é utilizado para garantir objetivos grandes pelo mapa, como os Dragões e o Barão Na’Shor. ATENÇÃO: esta rota exige bastante conhecimento e noção de jogo para não ficar para trás em experiência e ouro e não deixar seus companheiros na mão.", 
 rotaMid = ". Além da proximidade de ambos os covis de monstros épicos, a Rota do Meio também é mais movimentada por conta da maior facilidade de se realizar alguma ação. Isso se deve ao fator de que a rota possui várias formas de ser gankada e também do jogador se movimentar pelo mapa.Dessa forma, como mid laner, você precisa ter atenção redobrada na rota, contribuir com dano em team fights e se movimentar no mapa para auxiliar a equipe.",
 rotaTop = ". Os jogadores da rota superior costumam atuar na linha de frente, servindo como tanques (personagens com muita vida e resistência), lutadores (personagens de ataque corpo a corpo com boa quantidade de dano) e potenciais iniciadores de team fights. Dependendo da situação, os topos também podem funcionar como escudos para aliados mais frágeis.";
 
+
+function gerarSalt(){
+    return  crypto.randomBytes(16).toString('hex');
+};
+
+function sha512(senha, salt){
+    var hash = crypto.createHmac('sha512', salt); // Algoritmo de cripto sha512
+    hash.update(senha);
+    var hash = hash.digest('hex');
+    return {
+        salt,
+        hash,
+    };
+};
+
+function gerarSenha(senha) {
+    var salt = gerarSalt(16); // Vamos gerar o salt
+    var senhaESalt = sha512(senha, salt); // Pegamos a senha e o salt
+    return senhaESalt;
+}
 //verifica usuario e cria uma sessão
 module.exports = {
     index(req, res, next) {
@@ -14,13 +35,23 @@ module.exports = {
 
     /*Colocar todo codigo de vericacao de login*/
     async login(req, res, next) {
-        const valor = await bd.selectUserLogin({email: req.body.email, senha:req.body.senha})
+        
+        const valor = await bd.selectUserLogin({email: req.body.email})
         if(valor[0]){
-            req.session.idusuario = valor[0]._id;
-            req.session.usuEmail = valor[0].email;
-            req.session.usuario = valor[0].nomeUsuario;
-            req.session.imagem = valor[0].imagem
-            res.redirect("usuarioSeguranca")
+            const bancoSenha = valor[0].senha;
+            const bancoSalt = valor[0].salt
+            const senhaUsu = sha512(req.body.senha.toString(), bancoSalt);
+            if (bancoSenha === senhaUsu.hash){
+                req.session.idusuario = valor[0]._id;
+                req.session.usuEmail = valor[0].email;
+                req.session.usuario = valor[0].nomeUsuario;
+                req.session.imagem = valor[0].imagem
+                res.redirect("usuarioSeguranca")
+            }else{
+                info = { error: "erro"}
+                res.render("index", {info})
+            }
+            
         }else{
             info = { error: "erro"}
             res.render("index", {info})
@@ -29,6 +60,28 @@ module.exports = {
 
     esqueciSenha(req, res, next){
         res.render('esqueciSenha')
+    },
+
+    async recuperacaoSenha(req, res, next){
+        if(req.body.senha && req.body.email){
+            const valor = await bd.selectEmail({
+                email: req.body.email
+            })
+            
+            const user = valor[0]._id;
+            const saltESenha = gerarSenha(req.body.senha.toString());
+            try {
+                const valores = await bd.updateSenhaUser({id: user, senha: saltESenha.hash, salt: saltESenha.salt})
+                res.redirect('/');
+            } catch(err) {
+                console.log(err);
+                info = {error: 'fail'}
+                res.render('esqueciSenha', {info})
+            }
+        }else{
+            info = {error: 'fail'}
+            res.render('esqueciSenha', {info})
+        }
     },
 
     async esqueciSenha2(req, res, next){ 
@@ -51,11 +104,13 @@ module.exports = {
     },
 
     async cadastre(req,res,next){
+        const saltESenha = gerarSenha(req.body.senha);
         try {
             const valores = await bd.insertUser({
             email:req.body.email,
             usuario:req.body.usuario,
-            senha: req.body.senha
+            senha: saltESenha.hash,
+            salt: saltESenha.salt
         })
         res.redirect('/');
     } catch(err) {
@@ -63,19 +118,6 @@ module.exports = {
     }
     },
     
-    async recuperacaoSenha(req,res,next){
-        try {
-            const valor = await bd.updateSenha({
-            email: req.body.email, 
-            senha: req.body.senha
-        })
-        console.log('oi')
-        res.redirect('/')
-    } catch (err) {
-        console.log(err);
-        }
-        
-    },
     usuarioSeguranca(req, res, next) {
         if (!req.session.idusuario) {
             res.redirect('/')
@@ -178,7 +220,10 @@ module.exports = {
             var email = valores[0].email;
             var nomeUsuario = valores[0].nomeUsuario;
             var senha = valores[0].senha;
+            var salt = valores[0].salt;
             var imagem = valores[0].imagem;
+            
+            var saltESenha = {};
             if (req.body.email != valores[0].email && req.body.email != "") {
                 email = req.body.email;
                 req.session.usuEmail = req.body.email;
@@ -187,11 +232,18 @@ module.exports = {
                 nomeUsuario = req.body.usuario;
                 req.session.usuario = req.body.usuario;
             }
-            if (req.body.novaSenha != valores[0].senha && req.body.novaSenha != "" && req.body.senhaAtual == valores[0].senha) {
-                senha = req.body.novaSenha;
-            } else if (req.body.senhaAtual != valores[0].senha && req.body.novaSenha != "") {
-                res.status(424).send("Senha atual diferente da cadastrada!!")
-                return;
+            if(req.body.senhaAtual !== "" && req.body.senhaAtual !== null){
+                const senhaUsu = sha512(req.body.senhaAtual, salt);
+                if (senhaUsu.hash === senha) {
+                    saltESenha = gerarSenha(req.body.novaSenha.toString());
+                } else {
+                    info = {error: 'senhaERR'}
+                    res.render('usuarioSeguranca', {info})
+                    return;
+                }
+            }else{
+                info = {error: 'fail'}
+                res.render('usuarioSeguranca', {info})
             }
             if (req.body.avatar != valores[0].imagem && req.body.avatar != "") {
                 imagem = req.body.avatar;
@@ -201,7 +253,8 @@ module.exports = {
             try {
                 var valores2 = await bd.updateUser({
                     email: email,
-                    senha: senha,
+                    senha: saltESenha.hash,
+                    salt: saltESenha.salt,
                     imagem: imagem,
                     Usuario: nomeUsuario,
                     id: req.session.idusuario
@@ -211,9 +264,10 @@ module.exports = {
                 req.session.usuEmail = valores[0].email;
                 req.session.usuario = valores[0].nomeUsuario;
                 req.session.imagem = valores[0].imagem;
-                res.status(424).send("Não foi possivel atualizar o cadastro tente novamente!")
+                info = {error: 'fail'}
+                res.render('usuarioSeguranca', {info})
             }
-
+            
             
                 
 

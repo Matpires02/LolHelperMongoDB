@@ -29,7 +29,7 @@ async function loadCampeao(){
 
 async function selectUserLogin(dado){
     const posts = await loadUser();
-    casa = await posts.find({email:dado.email,senha:dado.senha}).toArray();
+    casa = await posts.find({email:dado.email}).toArray();
     return casa;
 }
 
@@ -75,6 +75,7 @@ async function  insertUser(dados){
         email: dados.email,
         nomeUsuario: dados.usuario,
         senha: dados.senha,
+        salt: dados.salt,
         imagem:'/public/images/banner.svg',
         fezQuiz:false
     })
@@ -83,7 +84,12 @@ async function  insertUser(dados){
 /*Update usuario quando ele muda lá no usuario seguranca*/
 async function updateUser(dados){
     const posts = await loadUser();
-    return await posts.updateOne({_id: new mongodb.ObjectID(dados.id)},{$set:{ email:dados.email,nomeUsuario:dados.Usuario, senha:dados.senha,imagem:dados.imagem}})
+    return await posts.updateOne({_id: new mongodb.ObjectID(dados.id)},{$set:{ email:dados.email,nomeUsuario:dados.Usuario, senha:dados.senha,salt:dados.salt, imagem:dados.imagem}})
+}
+// update  senha usuario
+async function updateSenhaUser(dados){
+    const posts = await loadUser();
+    return await posts.updateOne({_id: new mongodb.ObjectID(dados.id)},{$set:{senha:dados.senha, salt:dados.salt}})
 }
 
 /*Insere na 1 vez q faz o quiz */
@@ -161,5 +167,6 @@ module.exports = {
     updateQuiz,
     updateCampeoes,
     updateJogabilidade,
-    updateSenha
+    updateSenha,
+    updateSenhaUser
 }
