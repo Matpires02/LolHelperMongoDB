@@ -219,11 +219,10 @@ module.exports = {
             })
             var email = valores[0].email;
             var nomeUsuario = valores[0].nomeUsuario;
-            var senha = valores[0].senha;
-            var salt = valores[0].salt;
             var imagem = valores[0].imagem;
-            
             var saltESenha = {};
+            saltESenha.hash = valores[0].senha;
+            saltESenha.salt = valores[0].salt;
             if (req.body.email != valores[0].email && req.body.email != "") {
                 email = req.body.email;
                 req.session.usuEmail = req.body.email;
@@ -241,9 +240,6 @@ module.exports = {
                     res.render('usuarioSeguranca', {info})
                     return;
                 }
-            }else{
-                info = {error: 'fail'}
-                res.render('usuarioSeguranca', {info})
             }
             if (req.body.avatar != valores[0].imagem && req.body.avatar != "") {
                 imagem = req.body.avatar;
@@ -259,6 +255,11 @@ module.exports = {
                     Usuario: nomeUsuario,
                     id: req.session.idusuario
                 })
+
+                req.session.usuEmail = email;
+                req.session.usuario = nomeUsuario;
+                req.session.imagem = imagem;
+
                 res.redirect("/usuarioSeguranca")
             } catch (err) {
                 req.session.usuEmail = valores[0].email;
@@ -266,11 +267,7 @@ module.exports = {
                 req.session.imagem = valores[0].imagem;
                 info = {error: 'fail'}
                 res.render('usuarioSeguranca', {info})
-            }
-            
-            
-                
-
+            }     
         }
     },
 
