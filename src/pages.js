@@ -36,7 +36,7 @@ module.exports = {
     /*Colocar todo codigo de vericacao de login*/
     async login(req, res, next) {
         
-        const valor = await bd.selectUserLogin({email: req.body.email})
+        const valor = await bd.selectUserLogin({email: req.body.email.toLowerCase()})
         if(valor[0]){
             const bancoSenha = valor[0].senha;
             const bancoSalt = valor[0].salt
@@ -107,7 +107,7 @@ module.exports = {
         const saltESenha = gerarSenha(req.body.senha);
         try {
             const valores = await bd.insertUser({
-            email:req.body.email,
+            email:req.body.email.toLowerCase(),
             usuario:req.body.usuario,
             senha: saltESenha.hash,
             salt: saltESenha.salt
