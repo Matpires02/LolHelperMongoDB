@@ -16,6 +16,12 @@
 #menu {
   padding: 0;
 }
+.link-topo{
+  text-decoration: none;
+  position:fixed;
+  right: 10px;
+  bottom: 1rem;
+}
  
 
 @media only screen and (max-width: 991.98px) and (min-height: 576px) {

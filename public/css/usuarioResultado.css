@@ -1,7 +1,3 @@
-body{
-  
-}
-
 #right {
   margin: 0;
   padding: 0;
@@ -19,9 +15,17 @@ body{
   margin-bottom: 1rem !important;
 }
 
+
 .descricao,.descricao {
   margin-left: 20px;
   text-align: justify;
+}
+
+.link-topo{
+  text-decoration: none;
+  position:fixed;
+  right: 10px;
+  bottom: 1rem;
 }
 
 /*dispositivos tipo telefones com telas grandes na orientação horizontal*/
