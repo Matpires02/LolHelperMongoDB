@@ -104,16 +104,26 @@ module.exports = {
     },
 
     async cadastre(req,res,next){
-        const saltESenha = gerarSenha(req.body.senha);
+        const valores = await bd.selectEmail(req.body.email.toLowerCase());
+       console.log(valores[0])
+        if(valores[0] !== null && valores[0] !== undefined){
+            info = {error: 'fail'}
+            res.render('Cadastre', {info})
+            return;
+        } 
         try {
+            const saltESenha = gerarSenha(req.body.senha);
             const valores = await bd.insertUser({
             email:req.body.email.toLowerCase(),
             usuario:req.body.usuario,
             senha: saltESenha.hash,
             salt: saltESenha.salt
         })
-        res.redirect('/');
+        const info = {success: 'cad'}
+        res.render('index',{info});
     } catch(err) {
+        info = {error: 'bdError'}
+        res.render('Cadastre', {info})
         console.log(err);
     }
     },
