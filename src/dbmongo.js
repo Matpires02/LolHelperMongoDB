@@ -1,10 +1,7 @@
-const mongodb = require('mongodb');
+const { MongoClient, ObjectID } = require("mongodb");
 
 const uri = "mongodb+srv://userLolHelper:1234@cluster0.qhb7q.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-const client = new mongodb.MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-const client2 = new mongodb.MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-const client3 = new mongodb.MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-const client4 = new mongodb.MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(uri, {useUnifiedTopology: true });
 
 async function loadUser(){
     await client.connect();
@@ -13,18 +10,18 @@ async function loadUser(){
 }
 
 async function loadJogabilidade(){
-    await client2.connect();
-    return client2.db('LOLHelper').collection('Jogabilidade');
+    await client.connect();
+    return client.db('LOLHelper').collection('Jogabilidade');
 }
 
 async function loadQuiz(){
-    await client3.connect();
-    return client3.db('LOLHelper').collection('Quiz');
+    await client.connect();
+    return client.db('LOLHelper').collection('Quiz');
 }
 
 async function loadCampeao(){
-    await client4.connect();
-    return client4.db('LOLHelper').collection('Campeoes');
+    await client.connect();
+    return client.db('LOLHelper').collection('Campeoes');
 }
 
 async function selectUserLogin(dado){
@@ -35,7 +32,7 @@ async function selectUserLogin(dado){
 
 async function selectUserFezQuiz(dado){
     const posts = await loadUser();
-    casa = await posts.find({_id: new mongodb.ObjectID(dado.id)}).toArray();
+    casa = await posts.find({_id: new ObjectID(dado.id)}).toArray();
     return casa;
 }
 
@@ -50,14 +47,14 @@ async function selectEmail(dado){
 /*Seleciona tudo para verificar se alterou na hora de dar o update*/
 async function selectUserUpdate(dado){
     const posts = await loadUser();
-    casa = await posts.find({_id: new mongodb.ObjectID(dado.id)}).toArray();
+    casa = await posts.find({_id: new ObjectID(dado.id)}).toArray();
     return casa;
 }
 
 /* Selciona rota e funcao*/
 async function selectRota(dado){
     const posts =  await loadJogabilidade();
-    casa = await posts.find({idJog: new mongodb.ObjectID(dado.idJog)}).toArray();
+    casa = await posts.find({idJog: new ObjectID(dado.idJog)}).toArray();
     return casa;
 }
 
@@ -84,31 +81,31 @@ async function  insertUser(dados){
 /*Update usuario quando ele muda lá no usuario seguranca*/
 async function updateUser(dados){
     const posts = await loadUser();
-    return await posts.updateOne({_id: new mongodb.ObjectID(dados.id)},{$set:{ email:dados.email,nomeUsuario:dados.Usuario, senha:dados.senha,salt:dados.salt, imagem:dados.imagem}})
+    return await posts.updateOne({_id: new ObjectID(dados.id)},{$set:{ email:dados.email,nomeUsuario:dados.Usuario, senha:dados.senha,salt:dados.salt, imagem:dados.imagem}})
 }
 // update  senha usuario
 async function updateSenhaUser(dados){
     const posts = await loadUser();
-    return await posts.updateOne({_id: new mongodb.ObjectID(dados.id)},{$set:{senha:dados.senha, salt:dados.salt}})
+    return await posts.updateOne({_id: new ObjectID(dados.id)},{$set:{senha:dados.senha, salt:dados.salt}})
 }
 
 /*Insere na 1 vez q faz o quiz */
 async function insertQuiz(dados){
     const posts = await loadQuiz();
-    return await posts.insertOne({respostas:dados.resposta,idUsuario:new mongodb.ObjectID(dados.idUsuario)})
+    return await posts.insertOne({respostas:dados.resposta,idUsuario:new ObjectID(dados.idUsuario)})
 }
 
 /*Update usuario quando ele faz o quiz*/
 async function updateUserQuiz(dados){
     const posts = await loadUser();
-    return await posts.updateOne({_id: new mongodb.ObjectID(dados.id)},{$set:{fezQuiz: true}})
+    return await posts.updateOne({_id: new ObjectID(dados.id)},{$set:{fezQuiz: true}})
 }
 
 /*Insere na 1 vez q faz o quiz */
 async function insertJogabilidade(dados){
     const posts = await loadJogabilidade();
     return await posts.insertOne({
-        idJog:new mongodb.ObjectID(dados.idJog),
+        idJog:new ObjectID(dados.idJog),
         rota:dados.rota,
         funcao:dados.funcao
     })
@@ -127,7 +124,7 @@ async function insertCampeoes(dados){
 /*Update quando refaz o quiz*/
 async function updateQuiz(dados){
     const posts = await loadQuiz();
-    return await posts.updateOne({idUsuario: new mongodb.ObjectID(dados.id)},{$set:{respostas:dados.respostas}})
+    return await posts.updateOne({idUsuario: new ObjectID(dados.id)},{$set:{respostas:dados.respostas}})
 }
 
 /*Update quando refaz o quiz*/
@@ -142,7 +139,7 @@ async function updateCampeoes(dados){
 /*Update quando refaz o quiz*/
 async function updateJogabilidade(dados){
     const posts =  await loadJogabilidade();
-    return await posts.updateOne({idJog:new mongodb.ObjectID(dados.idJog)},{$set:{rota:dados.rota,funcao:dados.funcao}}) 
+    return await posts.updateOne({idJog:new ObjectID(dados.idJog)},{$set:{rota:dados.rota,funcao:dados.funcao}}) 
 }
 
 /* update senha*/
