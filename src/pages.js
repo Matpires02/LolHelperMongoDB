@@ -242,8 +242,8 @@ module.exports = {
                 req.session.usuario = req.body.usuario;
             }
             if(req.body.senhaAtual !== "" && req.body.senhaAtual !== null){
-                const senhaUsu = sha512(req.body.senhaAtual, salt);
-                if (senhaUsu.hash === senha) {
+                const senhaUsu = sha512(req.body.senhaAtual, saltESenha.salt);
+                if (senhaUsu.hash === saltESenha.hash) {
                     saltESenha = gerarSenha(req.body.novaSenha.toString());
                 } else {
                     info = {error: 'senhaERR'}
@@ -269,8 +269,9 @@ module.exports = {
                 req.session.usuEmail = email;
                 req.session.usuario = nomeUsuario;
                 req.session.imagem = imagem;
-
-                res.redirect("/usuarioSeguranca")
+                info = {success: 'exito'}
+                res.render('usuarioSeguranca', {info})
+                //res.redirect("/usuarioSeguranca")
             } catch (err) {
                 req.session.usuEmail = valores[0].email;
                 req.session.usuario = valores[0].nomeUsuario;

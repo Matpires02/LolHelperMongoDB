@@ -229,17 +229,26 @@
     if("{{info.error}}" ===  'senhaERR'){
         if( typeof Android !== 'undefined'){
         Android.jsShowToast("Senha atual diferente da cadastrada! Verifique e tente novamente")
-    }else{
-        alert("Senha atual diferente da cadastrada! Verifique e tente novamente")
-       
-    }
+        }else{
+            alert("Senha atual diferente da cadastrada! Verifique e tente novamente")
+        }
     }else{
         if( typeof Android !== 'undefined'){
         Android.jsShowToast("Não foi possivel completar a atualização no cadastro. Tente novamente! ")
-    }else{
+        }else{
         alert("Não foi possivel completar a atualização no cadastro. Tente novamente! ")
-       
+        }
     }
+    
+</script>
+{{/if}}
+
+{{#if info.success}}
+<script>
+     if( typeof Android !== 'undefined'){
+        Android.jsShowToast("Atualização feita com sucesso!", "Sucesso")
+    }else{
+        alert("Atualização feita com sucesso!")
     }
 </script>
 {{/if}}
