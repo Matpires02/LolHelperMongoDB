@@ -9,6 +9,12 @@
     .forEach(function (form) {
       form.addEventListener('submit', function (event) {
         if (!form.checkValidity()) {
+          alert('Alguns campos não foram preenchidos corretamente, verifique e tente novamente')
+          const fields = document.querySelectorAll("[required]")
+          console.log(fields)
+          for ( field of fields){
+            field.addEventListener('invalid')
+          }
           event.preventDefault()
           event.stopPropagation()
         }
